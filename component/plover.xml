@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- filename: plover.xml -->
+<component>
+		<name>org.freedesktop.IBus.Plover</name>
+		<description>IBus interface for Plover, an open source stenography program</description>
+		<exec>/usr/local/lib/ibus/ibus-engine-plover --no-register</exec>
+		<version>0.0.1</version>
+		<author>Jonathan Glines &lt;auntieNeo@gmail.com&gt;</author>
+		<license>GPL</license>
+		<homepage>http://example.org/</homepage>
+		<textdomain>plover</textdomain>
+
+		<engines>
+				<engine>
+						<name>plover</name>
+						<longname>Plover</longname>
+						<language>en</language>
+						<license>GPL</license>
+						<author>Jonathan Glines &lt;auntieNeo@gmail.com&gt;</author>
+						<icon></icon>
+						<layout>en</layout>
+						<description>IBus interface for Plover, an open source stenography program</description>
+				</engine>
+		</engines>
+</component>
