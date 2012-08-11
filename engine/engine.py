@@ -1,5 +1,6 @@
-# vim:set expandtap sw=4:
+# vim:set expandtab sw=4:
 import ibus
+from ibus import modifier
 import pprint
 
 class Engine(ibus.EngineBase):
@@ -21,6 +22,13 @@ class Engine(ibus.EngineBase):
         pprint.pprint(keyval)
         pprint.pprint(keycode)
         pprint.pprint(state)
+        if state & modifier.RELEASE_MASK:
+            print "release"
+            self.commit_text(ibus.Text("bar"))
+            self.hide_preedit_text()
+        else:
+            self.update_preedit_text(ibus.Text("foo"), 0, True)
+            
         self.__lookup_table.append_candidate(ibus.Text("blah"))
         return True
 

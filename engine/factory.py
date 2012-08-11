@@ -1,4 +1,4 @@
-# vim:set expandtap sw=4:
+# vim:set expandtab sw=4:
 import ibus
 import engine
 
