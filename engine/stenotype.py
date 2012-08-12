@@ -1,6 +1,7 @@
 # vim:set expandtab sw=4:
 
 from plover.machine import base
+from ibus import modifier
 from ibus import keysyms
 
 class IBusStenotype(base.StenotypeBase):
@@ -86,4 +87,3 @@ class IBusStenotype(base.StenotypeBase):
             # a key was pressed
             print "key_pressed"
             self.__pressed_keys.add(keycode)
-        return "blah"

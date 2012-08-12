@@ -51,16 +51,8 @@ class Engine(ibus.EngineBase):
         self.__preedit_text = ''
 
     def process_key_event(self, keyval, keycode, state):
-        print "keyval:"
-        pprint.pprint(keyval)
-        print "keycode:"
-        pprint.pprint(keycode)
-        print "state:"
-        pprint.pprint(state)
         for cb in self.__process_key_callbacks:
-            print "should have called some callback"
-            pprint.pprint(cb)
-            pprint.pprint(cb(keyval, keycode, state))
+            cb(keyval, keycode, state)
         return True
 
     def focus_in(self):
