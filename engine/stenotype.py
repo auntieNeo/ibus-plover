@@ -10,7 +10,7 @@ class IBusStenotype(base.StenotypeBase):
         base.StenotypeBase.__init__(self)
 
         # register our key event processing callback with the engine
-        engine._register_process_key_callback(lambda(keyval, keycode, state): self._process_key_callback(keyval, keycode, state))
+        engine.register_process_key_callback(lambda keyval, keycode, state: self.process_key_callback(keyval, keycode, state))
 
         # keep track of key press states
         self.__pressed_keys = set()
@@ -64,7 +64,7 @@ class IBusStenotype(base.StenotypeBase):
         """Dummy implementation. IBus controls when we have keyboard focus or not."""
         return True
 
-    def _process_key_callback(self, keyval, keycode, state):
+    def process_key_callback(self, keyval, keycode, state):
         if state & modifier.RELEASE_MASK:
             # a key was released
             print "key_released"
@@ -86,5 +86,4 @@ class IBusStenotype(base.StenotypeBase):
             # a key was pressed
             print "key_pressed"
             self.__pressed_keys.add(keycode)
-            self.update_preedit_text(ibus.Text("foo"), 0, True)
-        return True
+        return "blah"
