@@ -7,6 +7,7 @@ from plover import dictionary
 import plover.config
 import pprint
 import stenotype
+from collections import deque
 try:
     import simplejson as json
 except ImportError:
@@ -48,7 +49,7 @@ class Engine(ibus.EngineBase):
 
         # initialize members for keeping track of preedit state
         # TODO: represent this entirely with stroke/translation objects rather than text, for easier display and formatting
-        self.__preedit_text = ''
+        self.__translation_buffer = deque([])  # a queue-type buffer that holds the translation objects being displayed the preedit buffer
 
     def process_key_event(self, keyval, keycode, state):
         for cb in self.__process_key_callbacks:
@@ -56,7 +57,10 @@ class Engine(ibus.EngineBase):
         return True
 
     def focus_in(self):
-        self.register_properties(self.__prop_list)
+        self.show_preedit_text()
+
+    def focus_out(self):
+        self.hide_preedit_text()
 
     def register_process_key_callback(self, callback):
         self.__process_key_callbacks.append(callback)
@@ -64,6 +68,14 @@ class Engine(ibus.EngineBase):
     def __translation_callback(self, translation, overflow):
         print "translation callback"
         if not translation.is_correction:
-            self.__preedit_text += translation.english
-            self.update_preedit_text(ibus.Text(self.__preedit_text), 0, True)
+            self.__translation_buffer.append(translation)
+            self.__update_preedit_text()
+        return True
+
+    def __update_preedit_text(self):
+        """This method looks at the translation objects in self.__translation_buffer and displays them in the preedit buffer as text. It applies different formatting attributes to the text to convey the state of each translation."""
+        preedit_text = ""
+        for translation in self.__translation_buffer:
+            preedit_text += translation.english + " "
+        self.update_preedit_text(ibus.Text(preedit_text), 0, True)
         return True
