@@ -3,6 +3,8 @@
 from plover.machine import base
 from ibus import modifier
 from ibus import keysyms
+import keycodes
+import pprint
 
 class IBusStenotype(base.StenotypeBase):
     """A keyboard based stenotype that uses keyboard events from our IBus engine."""
@@ -57,6 +59,45 @@ class IBusStenotype(base.StenotypeBase):
                                          keysyms.hyphen: "#",
                                          keysyms.equal: "#" }
 
+        self.__steno_keycodes_mapping = { keycodes.A: "S-",
+                                         keycodes.Q: "S-",
+                                         keycodes.W: "T-",
+                                         keycodes.S: "K-",
+                                         keycodes.E: "P-",
+                                         keycodes.D: "W-",
+                                         keycodes.R: "H-",
+                                         keycodes.F: "R-",
+                                         keycodes.C: "A-",
+                                         keycodes.V: "O-",
+                                         keycodes.T: "*",
+                                         keycodes.G: "*",
+                                         keycodes.Y: "*",
+                                         keycodes.H: "*",
+                                         keycodes.N: "-E",
+                                         keycodes.M: "-U",
+                                         keycodes.U: "-F",
+                                         keycodes.J: "-R",
+                                         keycodes.I: "-P",
+                                         keycodes.K: "-B",
+                                         keycodes.O: "-L",
+                                         keycodes.L: "-G",
+                                         keycodes.P: "-T",
+                                         keycodes.SEMICOLON: "-S",
+                                         keycodes.LEFTBRACE: "-D",
+                                         keycodes.APOSTROPHE: "-Z",
+                                         keycodes._1: "#",
+                                         keycodes._2: "#",
+                                         keycodes._3: "#",
+                                         keycodes._4: "#",
+                                         keycodes._5: "#",
+                                         keycodes._6: "#",
+                                         keycodes._7: "#",
+                                         keycodes._8: "#",
+                                         keycodes._9: "#",
+                                         keycodes._0: "#",
+                                         keycodes.MINUS: "#",
+                                         keycodes.EQUAL: "#" }
+
     def start_capture(self):
         """Dummy implementation. IBus controls when we have keyboard focus or not."""
         return True
@@ -73,17 +114,26 @@ class IBusStenotype(base.StenotypeBase):
 
             # remove invalid released keys
             self.__released_keys = self.__released_keys.intersection(self.__pressed_keys)
+            print "pressed keys:"
+            pprint.pprint(self.__pressed_keys)
+            print "released keys:"
+            pprint.pprint(self.__released_keys)
+            print "released == pressed:"
+            pprint.pprint(self.__released_keys == self.__pressed_keys)
 
             # a stroke is complete when all of the keys that were pressed are released
             if self.__released_keys == self.__pressed_keys:
                 # convert the keysyms to steno keys and notify our listeners
-                steno_keys = array()
-                for i in self.__pressed_keys:
-                    steno_keys.append(self.__steno_keysym_mapping[i])
-                self._notify(steno_keys)
+                steno_keys = [self.__steno_keycodes_mapping[i] for i in self.__pressed_keys]
+                print "notifying our listeners of a steno stroke"
+#                self._notify(steno_keys)
                 self.__released_keys.clear()
                 self.__pressed_keys.clear()
         else:
             # a key was pressed
             print "key_pressed"
-            self.__pressed_keys.add(keycode)
+            pprint.pprint(keycode)
+#            pprint.pprint(keyval)
+            # only add keys that are in our steno mapping
+            if keycode in self.__steno_keycodes_mapping:
+                self.__pressed_keys.add(keycode)
