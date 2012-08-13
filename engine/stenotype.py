@@ -122,13 +122,13 @@ class IBusStenotype(base.StenotypeBase):
             pprint.pprint(self.__released_keys == self.__pressed_keys)
 
             # a stroke is complete when all of the keys that were pressed are released
-            if self.__released_keys == self.__pressed_keys:
+            if self.__pressed_keys and (self.__released_keys == self.__pressed_keys):
                 # convert the keysyms to steno keys and notify our listeners
                 steno_keys = [self.__steno_keycodes_mapping[i] for i in self.__pressed_keys]
-                print "notifying our listeners of a steno stroke"
-                self._notify(steno_keys)
                 self.__released_keys.clear()
                 self.__pressed_keys.clear()
+                print "notifying our listeners of a steno stroke"
+                self._notify(steno_keys)
         else:
             # a key was pressed
             print "key_pressed"

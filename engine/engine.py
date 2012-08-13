@@ -43,8 +43,7 @@ class Engine(ibus.EngineBase):
         # instatiate the stenography objects
         self.__translator = steno.Translator(self.__stenotype, self.__dictionary, self.__dictionary_module)
 
-        # add callbacks
-        self.__stenotype.add_callback(lambda steno_keys: self.__translator.consume_steno_keys(steno_keys))
+        # add callback for receiving translations from the translator
         self.__translator.add_callback(lambda translation, overflow: self.__translation_callback(translation, overflow))
 
         # initialize members for keeping track of preedit state
@@ -57,7 +56,8 @@ class Engine(ibus.EngineBase):
         return True
 
     def focus_in(self):
-        self.show_preedit_text()
+        if self.__translation_buffer:
+            self.show_preedit_text()
 
     def focus_out(self):
         self.hide_preedit_text()
@@ -67,15 +67,22 @@ class Engine(ibus.EngineBase):
 
     def __translation_callback(self, translation, overflow):
         print "translation callback"
+        if overflow is not None:
+            pass  # TODO: remove overflow translations from the left side of __translation_buffer
         if not translation.is_correction:
+            print "appending translation"
             self.__translation_buffer.append(translation)
+            print "calling update preedit"
             self.__update_preedit_text()
+        else:
+            print "it was a correction"
         return True
 
     def __update_preedit_text(self):
         """This method looks at the translation objects in self.__translation_buffer and displays them in the preedit buffer as text. It applies different formatting attributes to the text to convey the state of each translation."""
+        print "__update_preedit_text"
         preedit_text = ""
-        for translation in self.__translation_buffer:
+        for translation in list(self.__translation_buffer):
             preedit_text += translation.english + " "
         self.update_preedit_text(ibus.Text(preedit_text), 0, True)
         return True
