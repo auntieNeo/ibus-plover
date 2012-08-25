@@ -3,10 +3,12 @@ import ibus
 from ibus import modifier
 from ibus import keysyms
 from plover import steno
+from plover import formatting
 from plover import dictionary
 import plover.config
 import pprint
 import stenotype
+import sys
 from collections import deque
 try:
     import simplejson as json
@@ -42,6 +44,7 @@ class Engine(ibus.EngineBase):
 
         # instatiate the stenography objects
         self.__translator = steno.Translator(self.__stenotype, self.__dictionary, self.__dictionary_module)
+        self.__formatter = formatting.Formatter(self.__translator)  # FIXME: This Formatter object is only needed for its _translations_to_string() method. We should either patch that to be a class method, or simply copy that method verbatim.
 
         # add callback for receiving translations from the translator
         self.__translator.add_callback(lambda translation, overflow: self.__translation_callback(translation, overflow))
@@ -67,20 +70,27 @@ class Engine(ibus.EngineBase):
 
     def __translation_callback(self, translation, overflow):
         print "translation callback"
-        if overflow is not None:
-            pass  # TODO: remove overflow translations from the left side of __translation_buffer
-        if not translation.is_correction:
-            print "appending translation"
-            self.__translation_buffer.append(translation)
-            print "calling update preedit"
-            self.__update_preedit_text()
-        else:
-            print "it was a correction"
-        return True
+        print "calling update preedit"
+        # FIXME: Plover seems to call this callback once for each translation object changed in a stroke, when really it only needs to call this callback once per stroke, and provide a batch of updated translation objects. Additionally, they seem to be emitted in a reverse order that's not even useful. In here we just ignore the translation argument and access the translation objects directly. There is still some overhead from this callback bug, but the same overhead exists in Plover itself.
+        try:
+            translation_buffer = ""
+            if overflow is not None:
+                translation_buffer = overflow + self.__translator.translations
+            else:
+                translation_buffer = self.__translator.translations
+            print "I think it just dies."
+            print "formatted string: " + self.__formatter.translations_to_string(translation_buffer)[0]
+            self.update_preedit_text(ibus.Text(self.__formatter.translations_to_string(translation_buffer)[0]), 0, True)
+        except:
+            print "Uh-oh, an exception!"
+            pprint.pprint(sys.exc_info())
+            pprint.pprint(self.__formatter)
+            raise
 
     def __update_preedit_text(self):
         """This method looks at the translation objects in self.__translation_buffer and displays them in the preedit buffer as text. It applies different formatting attributes to the text to convey the state of each translation."""
         print "__update_preedit_text"
+        # TODO: Because we cannot accurately determine which strokes make up English words when they are modified by suffixes, in order to get this working properly we must embed Plover's English orthography routines in this function.
         preedit_text = ""
         for translation in list(self.__translation_buffer):
             preedit_text += translation.english + " "
